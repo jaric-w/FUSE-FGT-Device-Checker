@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Donation Checker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* One ground, one ink, one accent. Surfaces are separated by tone steps, never lines or shadows. */
+  :root {
+    --ground: #f2f3ef; --surface: #e8eae4; --surface-2: #dde0d8; --ink: #141814; --muted: #535b55;
+    --accent: #1f6b45; --accent-ink: #f2f3ef; --accent-soft: #d3e6d9;
+    --no: #9e2f2f; --no-ink: #fbf1f1; --warn-soft: #f0e3c4;
+    --focus: #1f5fa8;
+    --margin: clamp(16px, 4vw, 48px);
+    --font: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #111412; --surface: #1a1e1b; --surface-2: #242a26; --ink: #eef1ee; --muted: #a3ada7;
+      --accent: #2f8a5a; --accent-ink: #f4f7f4; --accent-soft: #1d3326;
+      --no: #b54545; --no-ink: #fff4f4; --warn-soft: #3a3019; --focus: #8bb8ea;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #111412; --surface: #1a1e1b; --surface-2: #242a26; --ink: #eef1ee; --muted: #a3ada7;
+    --accent: #2f8a5a; --accent-ink: #f4f7f4; --accent-soft: #1d3326;
+    --no: #b54545; --no-ink: #fff4f4; --warn-soft: #3a3019; --focus: #8bb8ea;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font: 17px/1.55 var(--font); -webkit-font-smoothing: antialiased; }
+  button, input, select { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  a { color: inherit; }
+
+  .notice { background: var(--warn-soft); font-size: 14px; padding: 8px var(--margin); text-align: center; }
+  .frame { max-width: 1240px; margin: 0 auto; padding: 0 var(--margin); }
+
+  nav.bar { display: flex; justify-content: space-between; align-items: center; padding: 22px 0; gap: 16px; }
+  .wordmark { font-weight: 700; font-size: 17px; letter-spacing: -0.01em; text-decoration: none; }
+  .bar a.call { font-weight: 600; text-decoration: none; }
+  .bar a.call:hover { text-decoration: underline; }
+
+  /* Layout: intro and drop-off facts on the left, the checker on the right. */
+  .layout { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "intro tool" "info tool"; gap: 0 clamp(32px, 5vw, 80px); padding: clamp(24px, 6vw, 72px) 0 clamp(80px, 10vw, 160px); align-items: start; }
+  .intro { grid-area: intro; min-width: 0; }
+  .info { grid-area: info; margin-top: 48px; min-width: 0; }
+  .tool { grid-area: tool; min-width: 0; }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: "intro" "tool" "info"; }
+    .info { margin-top: 56px; }
+    .tool { margin-top: 32px; }
+  }
+
+  h1 { font-size: clamp(40px, 5vw, 72px); line-height: .98; letter-spacing: -0.035em; font-weight: 700; margin: 0; text-wrap: balance; }
+  .lede { font-size: 19px; margin: 28px 0 0; max-width: 34ch; }
+
+  .info h2 { font-size: 22px; letter-spacing: -0.01em; margin: 0 0 16px; }
+  .facts { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; }
+  .facts b { display: block; font-weight: 600; }
+  .facts span { color: var(--muted); font-size: 15px; }
+  .needed { margin-top: 32px; padding: 20px 22px; background: var(--surface); }
+  .needed p { margin: 6px 0 0; }
+
+  /* The checker */
+  .tool-head { display: flex; justify-content: space-between; align-items: center; min-height: 40px; gap: 12px; }
+  .back { background: none; border: 0; padding: 8px 0; font-weight: 600; cursor: pointer; }
+  .back:hover { text-decoration: underline; }
+  .back[hidden] { visibility: hidden; display: inline-block; }
+  .left { color: var(--muted); font-size: 15px; }
+  .track { height: 4px; background: var(--surface-2); margin: 8px 0 0; }
+  .track i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .35s cubic-bezier(.2,.7,.2,1); }
+
+  .panel { background: var(--surface); padding: clamp(22px, 4vw, 40px); }
+  .panel h2 { font-size: clamp(26px, 3vw, 34px); line-height: 1.1; letter-spacing: -0.02em; margin: 0; outline: none; text-wrap: balance; overflow-wrap: anywhere; }
+  .panel .help { color: var(--muted); margin: 10px 0 28px; }
+
+  .rise > * { animation: rise .45s cubic-bezier(.2,.7,.2,1) both; }
+  .rise > *:nth-child(2) { animation-delay: .06s; } .rise > *:nth-child(3) { animation-delay: .12s; }
+  .rise > *:nth-child(4) { animation-delay: .18s; } .rise > *:nth-child(5) { animation-delay: .24s; }
+  .rise > *:nth-child(n+6) { animation-delay: .3s; }
+  @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .rise > * { animation: none; } .track i { transition: none; } }
+
+  /* Square corners everywhere: one shape system. */
+  .choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  @media (max-width: 520px) { .choices { grid-template-columns: repeat(2, 1fr); } }
+  .choice, .opt, .preset, .seg button, .step-btn { border: 0; cursor: pointer; background: var(--ground); transition: background .15s, color .15s, transform .1s; }
+  .choice:hover, .opt:hover, .preset:hover, .step-btn:hover { background: var(--surface-2); }
+  .choice:active, .opt:active, .preset:active, .step-btn:active, .btn:active { transform: scale(.98); }
+  .choice { min-height: 84px; padding: 16px; text-align: left; font-size: 19px; font-weight: 600; letter-spacing: -0.01em; display: flex; align-items: flex-end; }
+
+  .find { margin-top: 28px; }
+  .find label, .field label { display: block; font-weight: 600; font-size: 15px; margin-bottom: 8px; }
+  input[type=text], input[type=number], input[type=email], select {
+    width: 100%; min-height: 50px; padding: 12px 14px; border: 1px solid var(--surface-2); border-radius: 0; background: var(--ground); }
+  input:focus, select:focus { outline: 3px solid var(--focus); outline-offset: 0; }
+  input[aria-invalid=true] { border-color: var(--no); }
+  .suggest { list-style: none; margin: 4px 0 0; padding: 0; background: var(--ground); }
+  .suggest:empty { display: none; }
+  .suggest button { width: 100%; display: flex; justify-content: space-between; gap: 12px; text-align: left; padding: 12px 14px; border: 0; background: none; cursor: pointer; }
+  .suggest button:hover, .suggest button[aria-selected=true] { background: var(--surface-2); }
+  .suggest em { font-style: normal; font-size: 14px; font-weight: 600; white-space: nowrap; }
+  .t-need { color: var(--accent); } .t-ok { color: var(--muted); } .t-no { color: var(--no); }
+
+  .options { display: grid; gap: 8px; }
+  .opt { width: 100%; text-align: left; padding: 16px 18px; min-height: 64px; }
+  .opt b { display: block; font-weight: 600; font-size: 18px; }
+  .opt span { color: var(--muted); font-size: 15px; }
+  .opt[aria-pressed=true] { background: var(--accent); color: var(--accent-ink); }
+  .opt[aria-pressed=true] span { color: inherit; }
+
+  .stepper { display: flex; gap: 8px; align-items: stretch; }
+  .step-btn { width: 56px; font-size: 26px; }
+  .stepper input { width: 120px; text-align: center; font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .preset { padding: 8px 16px; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .note { margin: 20px 0 0; padding: 14px 16px; background: var(--ground); }
+  .note.bulk { background: var(--accent-soft); }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 12px 24px; border: 0; border-radius: 0;
+    background: var(--accent); color: var(--accent-ink); font-weight: 600; cursor: pointer; text-decoration: none; transition: background .15s, transform .1s; }
+  .btn:hover { background: var(--ink); color: var(--ground); }
+  .btn.quiet { background: var(--ground); color: var(--ink); }
+  .btn.quiet:hover { background: var(--surface-2); }
+  .btn.block { width: 100%; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+
+  /* Verdict: a whole field of colour, like the tag FGT puts on a donated machine. */
+  .verdict { padding: clamp(22px, 4vw, 36px); margin: calc(-1 * clamp(22px, 4vw, 40px)) calc(-1 * clamp(22px, 4vw, 40px)) 28px; }
+  .verdict .kind { font-weight: 600; font-size: 15px; margin: 0 0 10px; }
+  .verdict h2 { font-size: clamp(30px, 4vw, 44px); }
+  .verdict p.say { margin: 14px 0 0; max-width: 46ch; }
+  .v-accent { background: var(--accent); color: var(--accent-ink); }
+  .v-soft { background: var(--accent-soft); }
+  .v-no { background: var(--no); color: var(--no-ink); }
+  .v-warn { background: var(--warn-soft); }
+  .answers { margin: 0 0 24px; color: var(--muted); }
+  .answers button { background: none; border: 0; padding: 0; margin-left: 6px; font-weight: 600; color: var(--ink); text-decoration: underline; cursor: pointer; }
+
+  .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .seg button { padding: 14px; font-weight: 600; }
+  .seg button[aria-pressed=true] { background: var(--ink); color: var(--ground); }
+  .field { margin-top: 18px; }
+  .field .optional { font-weight: 400; color: var(--muted); }
+  .err { color: var(--no); font-size: 15px; margin: 6px 0 0; }
+  .err:empty { display: none; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+  @media (max-width: 560px) { .pair { grid-template-columns: 1fr; } }
+  .offer { margin-top: 24px; padding: 16px 18px; background: var(--ground); }
+  .offer.free { background: var(--accent-soft); }
+
+  .next h3 { font-size: 20px; margin: 0 0 14px; }
+  .next ol { margin: 0; padding-left: 22px; display: grid; gap: 14px; }
+  .next li::marker { font-weight: 700; color: var(--accent); }
+  .next b { display: block; font-weight: 600; }
+  .next span { color: var(--muted); font-size: 15px; }
+
+  /* Sample certificate */
+  .cert { margin-top: 32px; background: var(--ground); padding: clamp(20px, 4vw, 32px); }
+  .cert-top { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+  .cert .sample { color: var(--no); font-weight: 700; font-size: 15px; }
+  .cert h3 { font-size: 24px; letter-spacing: -0.015em; line-height: 1.15; margin: 6px 0 4px; }
+  .figures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 24px 0; }
+  @media (max-width: 520px) { .figures { grid-template-columns: 1fr; } }
+  .figures div { background: var(--accent-soft); padding: 16px; }
+  .figures b { display: block; font-size: 34px; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .tablewrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--surface-2); white-space: nowrap; }
+  th { font-weight: 600; color: var(--muted); }
+  .small { color: var(--muted); font-size: 15px; }
+
+  footer { background: var(--surface); padding: 56px 0 40px; }
+  footer .big { font-size: clamp(40px, 9vw, 128px); font-weight: 700; letter-spacing: -0.045em; line-height: .9; margin: 0 0 32px; }
+  footer p { margin: 0; max-width: 70ch; color: var(--muted); font-size: 15px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  @media print { .notice, nav.bar, .intro, .info, .tool-head, .track, footer, .noprint { display: none !important; } body { background: #fff; } }
+</style>
+</head>
+<body>
+<p class="notice">Student prototype for FUSE Blueprint 2026. This is not an official Free Geek Toronto website.</p>
+
+<div class="frame">
+  <nav class="bar" aria-label="Site">
+    <a class="wordmark" href="#">Free Geek Toronto</a>
+    <a class="call" href="tel:+14165723737">Call 416-572-3737</a>
+  </nav>
+
+  <div class="layout">
+    <div class="intro">
+      <h1>Can we take your tech?</h1>
+      <p class="lede">Answer a few questions and find out if we can reuse it, and whether to drop it off or book a pickup.</p>
+    </div>
+
+    <aside class="info" aria-labelledby="dropoff-h">
+      <h2 id="dropoff-h">Drop-off</h2>
+      <ul class="facts">
+        <li><b>180 Sudbury St, Unit C3</b><span>Parkdale, Toronto. Entrance on the northeast corner, up a few stairs.</span></li>
+        <li><b>Fridays and Saturdays, 12:15 to 4:45 PM</b><span>We have carts and people to help unload your car.</span></li>
+        <li><b>Free, and your data is erased</b><span>Every drive is securely wiped before anything is reused.</span></li>
+      </ul>
+      <div class="needed">
+        <b>What we need most</b>
+        <p>Laptops, desktops, flat-screen monitors, keyboards, mice and chargers.</p>
+      </div>
+    </aside>
+
+    <section class="tool" aria-labelledby="tool-title">
+      <h2 id="tool-title" class="sr">Donation checker</h2>
+      <div class="tool-head noprint">
+        <button class="back" id="back" hidden>‹ Back</button>
+        <span class="left" id="left" aria-live="polite"></span>
+      </div>
+      <div class="track noprint" role="progressbar" aria-label="Progress" aria-valuemin="0" aria-valuemax="100"><i id="bar"></i></div>
+      <div id="app" aria-live="polite"></div>
+    </section>
+  </div>
+</div>
+
+<footer>
+  <div class="frame">
+    <p class="big">Free Geek Toronto</p>
+    <p>Accepted items come from Free Geek Toronto's public donation page, and pickup fees are its published rates.
+      Free pickup, data-wipe certificates and impact reports are proposed features of this student prototype.</p>
+  </div>
+</footer>
+
+<script>
+const BULK = 5;          // computers needed before we offer pickup
+const FREE_MIN = 10;     // business batch size that qualifies for free pickup
+const ADDRESS = "180 Sudbury St, Unit C3, Toronto";
+const HOURS = "Fridays and Saturdays, 12:15 to 4:45 PM";
+
+// tier: need = most needed, ok = accepted, no = not accepted.
+// computer: ask age + condition; eligible for bulk pickup.
+const DEVICES = [
+  { id: "laptop", name: "Laptop", plural: "laptops", tier: "need", computer: true, keys: "notebook macbook chromebook thinkpad dell hp lenovo" },
+  { id: "desktop", name: "Desktop", plural: "desktops", tier: "need", computer: true, keys: "pc tower imac computer" },
+  { id: "monitor", name: "Monitor", plural: "monitors", tier: "need", keys: "screen display lcd flat" },
+  { id: "keyboard", name: "Keyboard or mouse", tier: "need", keys: "trackpad mice" },
+  { id: "webcam", name: "Webcam", tier: "need", keys: "camera usb" },
+  { id: "cables", name: "Cables and chargers", tier: "need", keys: "charger adapter usb hdmi power cord" },
+  { id: "parts", name: "Computer parts (RAM, SSD, GPU)", tier: "need", keys: "ram ssd hdd hard drive gpu graphics card psu memory component" },
+  { id: "server", name: "Server", plural: "servers", tier: "ok", computer: true, keys: "rack" },
+  { id: "phone", name: "Phone", tier: "ok", keys: "iphone android smartphone cell samsung mobile" },
+  { id: "tablet", name: "Tablet", tier: "ok", keys: "ipad kindle" },
+  { id: "router", name: "Modem, router or switch", tier: "ok", keys: "wifi networking" },
+  { id: "console", name: "Gaming console and games", tier: "ok", keys: "xbox playstation ps4 ps5 nintendo switch wii controller" },
+  { id: "tv", name: "Flat-screen TV", tier: "ok", keys: "television lcd plasma" },
+  { id: "scanner", name: "Scanner", tier: "ok", keys: "" },
+  { id: "camera", name: "Digital camera", tier: "ok", keys: "camera" },
+  { id: "audio", name: "Stereo, radio or amplifier", tier: "ok", keys: "audio receiver" },
+  { id: "turntable", name: "Turntable", tier: "ok", keys: "record player vinyl" },
+  { id: "speakers", name: "Speakers", tier: "ok", keys: "bluetooth audio" },
+  { id: "projector", name: "Video projector", tier: "ok", keys: "" },
+  { id: "dvd", name: "DVD or Blu-ray player", tier: "ok", keys: "" },
+  { id: "vcr", name: "VCR player", tier: "ok", keys: "" },
+  { id: "batteries", name: "Batteries", tier: "no", keys: "battery aa lithium", alt: "Many hardware and electronics stores collect household batteries." },
+  { id: "flashlight", name: "Flashlight", tier: "no", keys: "torch" },
+  { id: "typewriter", name: "Electric typewriter", tier: "no", keys: "" },
+  { id: "tools", name: "Power tools", tier: "no", keys: "drill saw motorized electric tool" },
+  { id: "microwave", name: "Microwave", tier: "no", keys: "oven" },
+  { id: "smoke", name: "Smoke detector", tier: "no", keys: "alarm", alt: "Some contain radioactive material, so follow the manufacturer's disposal instructions." },
+  { id: "appliance", name: "Appliance or air conditioner", tier: "no", keys: "fridge washer dryer kettle toaster" },
+  { id: "register", name: "Cash register", tier: "no", keys: "" },
+  { id: "motor", name: "Motor", tier: "no", keys: "" },
+  { id: "vhs", name: "VHS tapes", tier: "no", keys: "video tape" },
+  { id: "fax", name: "Fax machine", tier: "no", keys: "" },
+  { id: "telephone", name: "Landline phone or answering machine", tier: "no", keys: "landline cordless telephone" },
+];
+const CHOICES = ["laptop", "desktop", "monitor", "phone", "tablet", "keyboard"];
+const TIER = { need: ["Most needed", "t-need"], ok: ["Accepted", "t-ok"], no: ["Not accepted", "t-no"] };
+const AGE = [
+  { v: "new", t: "Under 4 years", s: "Bought fairly recently" },
+  { v: "mid", t: "4 to 8 years", s: "A few upgrades ago" },
+  { v: "old", t: "Over 8 years", s: "From before most of today's phones" },
+  { v: "unsure", t: "Not sure", s: "That's fine, we'll check" },
+];
+const WORKS = [
+  { v: "yes", t: "Yes, they turn on" },
+  { v: "some", t: "Some of them do" },
+  { v: "no", t: "No, they don't" },
+  { v: "unsure", t: "Not sure" },
+];
+const NUMBER_WORDS = ["No", "One", "Two", "Three", "Four"];
+
+const app = document.getElementById("app");
+const state = { device: null, qty: 1, age: null, works: null, who: "biz", form: {} };
+let trail = [];
+
+const byId = (id) => DEVICES.find(d => d.id === id);
+const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const things = () => state.device.plural || "items";
+
+// ---------- navigation ----------
+function steps() {
+  const d = state.device;
+  if (!d || d.tier === "no" || d.tier === "unknown") return ["device", "result"];
+  return d.computer ? ["device", "qty", "age", "works", "result"] : ["device", "qty", "result"];
+}
+function go(screen, push = true) {
+  if (push && trail[trail.length - 1] !== screen) trail.push(screen);
+  render(screen);
+}
+function back() { trail.pop(); render(trail[trail.length - 1] || "device"); }
+document.getElementById("back").onclick = back;
+
+function setProgress(screen) {
+  const s = steps(), bulk = state.device && state.device.computer && state.qty >= BULK;
+  const seq = bulk ? [...s, "pickup", "done"] : s;
+  const pct = Math.round((Math.max(seq.indexOf(screen), 0) / (seq.length - 1)) * 100);
+  document.getElementById("bar").style.width = pct + "%";
+  document.querySelector(".track").setAttribute("aria-valuenow", pct);
+  const remaining = s.indexOf("result") - s.indexOf(screen);
+  document.getElementById("left").textContent =
+    screen === "device" ? "Takes about 30 seconds" :
+    screen === "result" ? "Your answer" :
+    screen === "pickup" ? "Last step" :
+    screen === "done" ? "Request sent" :
+    remaining === 1 ? "Last question" : `${NUMBER_WORDS[remaining] || remaining} questions left`;
+  document.getElementById("back").hidden = trail.length <= 1;
+}
+
+function render(screen) {
+  setProgress(screen);
+  // The first screen shows at once; later screens rise in as the visitor moves through.
+  app.innerHTML = `<div class="panel${trail.length > 1 ? " rise" : ""}">${SCREENS[screen]()}</div>`;
+  (BIND[screen] || (() => {}))();
+  const h = app.querySelector("h2");
+  if (h) { h.setAttribute("tabindex", "-1"); h.focus({ preventScroll: true }); }
+  if (trail.length > 1) document.querySelector(".tool").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+}
+
+// ---------- screens ----------
+const SCREENS = {
+  device: () => `
+    <h2>What are you donating?</h2>
+    <p class="help">Pick one, or search for anything else.</p>
+    <div class="choices">${CHOICES.map(id => `<button class="choice" data-id="${id}">${byId(id).name}</button>`).join("")}</div>
+    <div class="find">
+      <label for="search">Search all items</label>
+      <input type="text" id="search" placeholder="Printer, PS4, microwave" autocomplete="off"
+        role="combobox" aria-expanded="false" aria-controls="suggest" aria-autocomplete="list">
+      <ul class="suggest" id="suggest" role="listbox" aria-label="Matching items"></ul>
+    </div>`,
+
+  qty: () => `
+    <h2>How many ${things()}?</h2>
+    <p class="help">${state.device.computer ? `${BULK} or more computers and we can come and pick them up.` : "A rough number is fine."}</p>
+    <div class="stepper">
+      <button type="button" class="step-btn" id="minus" aria-label="One fewer">−</button>
+      <input type="number" id="qty" min="1" max="2000" value="${state.qty}" inputmode="numeric" aria-label="How many">
+      <button type="button" class="step-btn" id="plus" aria-label="One more">+</button>
+    </div>
+    <div class="presets">${[1, 3, 5, 10, 25, 50].map(n => `<button class="preset" data-n="${n}">${n}</button>`).join("")}</div>
+    <p class="note" id="qty-note"></p>
+    <div class="actions"><button class="btn block" id="next">Continue</button></div>`,
+
+  age: () => `
+    <h2>How old ${state.qty > 1 ? "are they" : "is it"}, roughly?</h2>
+    <p class="help">This tells us whether ${state.qty > 1 ? "they" : "it"} can be refurbished.</p>
+    <div class="options">${AGE.map(o => opt(o, state.age)).join("")}</div>`,
+
+  works: () => `
+    <h2>Do ${state.qty > 1 ? "they" : "it"} turn on?</h2>
+    <p class="help">We take broken computers too.</p>
+    <div class="options">${WORKS.filter(o => state.qty > 1 || o.v !== "some")
+      .map(o => opt(state.qty > 1 ? o : { ...o, t: o.t.replace("they turn", "it turns").replace("they don't", "it doesn't") }, state.works)).join("")}</div>`,
+
+  result: () => resultHTML(),
+
+  pickup: () => {
+    const f = state.form;
+    return `
+    <h2>Book a pickup</h2>
+    <p class="help">${state.qty} ${things()}. We collect on Wednesdays and Thursdays.</p>
+    <form id="pickup-form" novalidate>
+      <div class="seg" role="group" aria-label="Who is donating">
+        <button type="button" data-who="biz" aria-pressed="${state.who === "biz"}">A business or organization</button>
+        <button type="button" data-who="solo" aria-pressed="${state.who === "solo"}">Just me</button>
+      </div>
+      ${state.who === "biz" ? field("org", "Organization name", "text", "", true, f.org, "organization") : ""}
+      <div class="pair">
+        ${field("name", "Your name", "text", "", true, f.name, "name")}
+        ${field("email", "Email", "email", "", true, f.email, "email")}
+      </div>
+      ${field("addr", "Pickup address", "text", "", true, f.addr, "street-address")}
+      <div class="pair">
+        <div class="field"><label for="zone">Area</label>
+          <select id="zone">${[["60", "Downtown Toronto"], ["70", "Midtown Toronto"], ["85", "Etobicoke or Scarborough"], ["100", "Peel or York Region"]]
+            .map(([v, t]) => `<option value="${v}" ${f.zone === v ? "selected" : ""}>${t}</option>`).join("")}</select></div>
+        <div class="field"><label for="day">Best day</label>
+          <select id="day">${["Either day", "Wednesday", "Thursday"].map(t => `<option ${f.day === t ? "selected" : ""}>${t}</option>`).join("")}</select></div>
+      </div>
+      <div class="field"><label for="same">Are they the same model?</label>
+        <select id="same">${[["same", "All or mostly the same"], ["few", "A few different models"], ["mixed", "All different"]]
+          .map(([v, t]) => `<option value="${v}" ${f.same === v ? "selected" : ""}>${t}</option>`).join("")}</select></div>
+      ${field("model", "Brand and model", "text", "Lenovo ThinkPad T480", false, f.model, "off")}
+      <p class="offer" id="offer"></p>
+      <div class="actions"><button class="btn block" type="submit">Request pickup</button></div>
+    </form>`;
+  },
+
+  done: () => doneHTML(),
+};
+
+function opt(o, cur) {
+  return `<button class="opt" data-v="${o.v}" aria-pressed="${cur === o.v}"><b>${o.t}</b>${o.s ? `<span>${o.s}</span>` : ""}</button>`;
+}
+function field(id, label, type, ph, req, val, ac) {
+  return `<div class="field"><label for="${id}">${label}${req ? "" : ' <span class="optional">(optional)</span>'}</label>
+    <input type="${type}" id="${id}" ${ph ? `placeholder="${ph}"` : ""} value="${esc(val || "")}" autocomplete="${ac}" ${req ? "required" : ""} aria-describedby="${id}-err">
+    <p class="err" id="${id}-err"></p></div>`;
+}
+
+// ---------- behaviour ----------
+const BIND = {
+  device: () => {
+    app.querySelectorAll(".choice").forEach(c => c.onclick = () => chooseDevice(byId(c.dataset.id)));
+    const input = app.querySelector("#search"), list = app.querySelector("#suggest");
+    let active = -1, items = [];
+    const draw = () => {
+      list.innerHTML = items.map((d, i) => `<li role="option"><button aria-selected="${i === active}" data-i="${i}">
+        <span>${esc(d.label || d.name)}</span>${TIER[d.tier] ? `<em class="${TIER[d.tier][1]}">${TIER[d.tier][0]}</em>` : ""}</button></li>`).join("");
+      input.setAttribute("aria-expanded", items.length > 0);
+      list.querySelectorAll("button").forEach(b => b.onclick = () => chooseDevice(items[+b.dataset.i]));
+    };
+    input.oninput = () => {
+      const raw = input.value.trim(), words = raw.toLowerCase().split(/\s+/);
+      active = -1;
+      if (!raw) { items = []; return draw(); }
+      items = DEVICES.filter(d => words.every(w => (d.name + " " + d.keys).toLowerCase().includes(w))).slice(0, 6);
+      if (!items.length) items = [{ name: raw, tier: "unknown", label: `Not on our list. What should I do with "${raw}"?` }];
+      draw();
+    };
+    input.onkeydown = (e) => {
+      if (!items.length) return;
+      if (e.key === "ArrowDown") { active = (active + 1) % items.length; draw(); e.preventDefault(); }
+      if (e.key === "ArrowUp") { active = (active - 1 + items.length) % items.length; draw(); e.preventDefault(); }
+      if (e.key === "Enter") { chooseDevice(items[Math.max(active, 0)]); e.preventDefault(); }
+    };
+  },
+  qty: () => {
+    const input = app.querySelector("#qty"), note = app.querySelector("#qty-note");
+    const update = () => {
+      state.qty = Math.max(1, Math.min(2000, parseInt(input.value, 10) || 1));
+      const bulk = state.device.computer && state.qty >= BULK;
+      note.className = "note" + (bulk ? " bulk" : "");
+      note.textContent = !state.device.computer ? "You can drop these off at the shop."
+        : bulk ? `${state.qty} computers counts as a bulk donation, so you can book a pickup.`
+        : `Under ${BULK} computers, dropping them off is quickest.`;
+    };
+    const next = () => { update(); go(state.device.computer ? "age" : "result"); };
+    app.querySelector("#minus").onclick = () => { input.value = Math.max(1, state.qty - 1); update(); };
+    app.querySelector("#plus").onclick = () => { input.value = state.qty + 1; update(); };
+    app.querySelectorAll(".preset").forEach(p => p.onclick = () => { input.value = p.dataset.n; update(); });
+    input.oninput = update;
+    input.onkeydown = (e) => { if (e.key === "Enter") next(); };
+    app.querySelector("#next").onclick = next;
+    update();
+  },
+  age: () => bindOptions("age", "works"),
+  works: () => bindOptions("works", "result"),
+  result: () => {
+    app.querySelectorAll("[data-edit]").forEach(b => b.onclick = () => go(b.dataset.edit));
+    const p = app.querySelector("#to-pickup"); if (p) p.onclick = () => go("pickup");
+    const r = app.querySelector("#restart"); if (r) r.onclick = restart;
+  },
+  pickup: () => {
+    const form = app.querySelector("#pickup-form");
+    const save = () => {
+      ["org", "name", "email", "addr", "model"].forEach(k => { const el = form.querySelector("#" + k); if (el) state.form[k] = el.value.trim(); });
+      ["zone", "day", "same"].forEach(k => state.form[k] = form.querySelector("#" + k).value);
+      const offer = form.querySelector("#offer"), free = qualifiesFree();
+      const dropoff = `Or skip the fee: drop-off at the shop is always free on ${HOURS}.`;
+      offer.className = "offer" + (free ? " free" : "");
+      offer.textContent = state.who !== "biz"
+        ? `We don't usually collect from homes, but we'll look at your request. Pickup starts at $${state.form.zone}. ${dropoff}`
+        : free ? `Good news: ${state.qty} similar computers in good shape qualify for free pickup.`
+        : `Pickup in this area starts at $${state.form.zone}. Businesses with ${FREE_MIN} or more similar, working computers under 8 years old get it free. ${dropoff}`;
+    };
+    form.querySelectorAll("[data-who]").forEach(b => b.onclick = () => { save(); state.who = b.dataset.who; render("pickup"); });
+    form.addEventListener("input", save);
+    form.addEventListener("change", save);
+    form.onsubmit = (e) => {
+      e.preventDefault(); save();
+      let first = null;
+      form.querySelectorAll("input[required]").forEach(el => {
+        const msg = !el.value.trim() ? "Please fill this in."
+          : el.type === "email" && !/^\S+@\S+\.\S+$/.test(el.value) ? "That email doesn't look right. Try name@example.com." : "";
+        el.setAttribute("aria-invalid", !!msg);
+        form.querySelector("#" + el.id + "-err").textContent = msg;
+        if (msg && !first) first = el;
+      });
+      if (first) { first.focus(); return; }
+      go("done");
+    };
+    save();
+  },
+  done: () => {
+    const c = app.querySelector("#see-cert");
+    if (c) c.onclick = () => { const box = app.querySelector("#cert"); box.innerHTML = certHTML(); c.remove(); box.scrollIntoView({ behavior: "smooth", block: "start" }); };
+    app.querySelector("#restart").onclick = restart;
+  },
+};
+
+function bindOptions(key, nextScreen) {
+  app.querySelectorAll(".opt").forEach(b => b.onclick = () => {
+    state[key] = b.dataset.v;
+    app.querySelectorAll(".opt").forEach(x => x.setAttribute("aria-pressed", x === b));
+    setTimeout(() => go(nextScreen), 180);   // brief pause so the choice is seen
+  });
+}
+function chooseDevice(d) {
+  if (state.device !== d) Object.assign(state, { device: d, qty: 1, age: null, works: null });
+  go(d.tier === "no" || d.tier === "unknown" ? "result" : "qty");
+}
+function restart() {
+  Object.assign(state, { device: null, qty: 1, age: null, works: null, who: "biz", form: {} });
+  trail = []; go("device");
+}
+function qualifiesFree() {
+  return state.who === "biz" && state.qty >= FREE_MIN && state.form.same !== "mixed" && state.age !== "old" && state.works !== "no";
+}
+
+// ---------- result content ----------
+function answers() {
+  const d = state.device, parts = [];
+  if (d.tier === "no" || d.tier === "unknown") parts.push(d.name);
+  else if (d.plural) parts.push(`${state.qty} ${state.qty > 1 ? d.plural : d.name.toLowerCase()}`);
+  else parts.push(state.qty > 1 ? `${d.name}, ${state.qty} of them` : d.name);
+  const many = state.qty > 1;
+  if (state.age) parts.push(AGE.find(a => a.v === state.age).t.toLowerCase() + " old");
+  if (state.works) parts.push({ yes: many ? "they turn on" : "it turns on", some: "some turn on", no: many ? "they don't turn on" : "it doesn't turn on", unsure: "not sure if " + (many ? "they work" : "it works") }[state.works]);
+  return `<p class="answers">${esc(parts.join(", "))}.<button data-edit="device">Change</button></p>`;
+}
+function verdict(cls, kind, title, say) {
+  return `<div class="verdict ${cls}"><p class="kind">${kind}</p><h2>${title}</h2><p class="say">${say}</p></div>`;
+}
+const DROPOFF = `
+  <ul class="facts">
+    <li><b>Bring ${"$"}{WHAT} to ${ADDRESS}</b><span>Entrance on the northeast corner, up a few stairs.</span></li>
+    <li><b>${HOURS}</b><span>Bring chargers and cables if you have them.</span></li>
+  </ul>
+  <div class="actions">
+    <a class="btn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS)}" target="_blank" rel="noopener">Get directions</a>
+    <button class="btn quiet" id="restart">Check something else</button>
+  </div>`;
+const dropoff = (many) => DROPOFF.replace("${WHAT}", many ? "them" : "it");
+
+function resultHTML() {
+  const d = state.device, n = state.qty, many = n > 1;
+  if (d.tier === "no") {
+    return verdict("v-no", "Not accepted", "Sorry, we can't take this", "We can't reuse or safely process it, so please don't leave it at our door.") + answers() +
+      `<ul class="facts">
+        <li><b>Try a City of Toronto drop-off depot</b><span>They take many household items and electronics.</span></li>
+        ${d.alt ? `<li><b>Good to know</b><span>${d.alt}</span></li>` : ""}
+      </ul><div class="actions"><button class="btn quiet" id="restart">Check something else</button></div>`;
+  }
+  if (d.tier === "unknown") {
+    return verdict("v-warn", "Not on our list", "Call us before you bring it", `We're not sure we can take "${esc(d.name)}". A quick call will save you the trip.`) + answers() +
+      `<div class="actions"><a class="btn" href="tel:+14165723737">Call 416-572-3737</a><button class="btn quiet" id="restart">Check something else</button></div>`;
+  }
+  if (d.computer && n >= BULK) {
+    const good = state.age !== "old" && state.works !== "no";
+    return verdict(good ? "v-accent" : "v-soft", good ? "Bulk donation, most needed" : "Bulk donation",
+      `Let's book a pickup for your ${n} ${things()}`,
+      good ? `Batches like this are exactly what we need. Businesses giving ${FREE_MIN} or more similar computers usually qualify for free pickup.`
+           : "Older or broken batches mostly go to parts and recycling, but we can still collect them.") + answers() +
+      `<div class="actions"><button class="btn block" id="to-pickup">Book a pickup</button></div>
+       <p class="small" style="margin:14px 0 0">Rather bring them in? Drop-off is free on ${HOURS}.</p>`;
+  }
+  if (d.computer) {
+    const old = state.age === "old", dead = state.works === "no";
+    if (old && dead) return verdict("v-soft", "Accepted for recycling", `We'll take ${many ? "them" : "it"}`,
+      "Old computers that don't turn on usually can't be refurbished, so we'll keep the working parts and recycle the rest properly.") + answers() + dropoff(many);
+    if (old || dead) return verdict("v-soft", "Accepted", `Yes, we can take ${many ? "these" : "this"}`,
+      "Depending on condition, we'll refurbish it or reuse its parts.") + answers() + dropoff(many);
+    return verdict("v-accent", "Most needed", `Yes, ${many ? "these are" : "this is"} exactly what we need`,
+      "Computers like this are refurbished and sold at low cost to students, newcomers, seniors and families.") + answers() + dropoff(many);
+  }
+  if (d.tier === "need") return verdict("v-accent", "Most needed", `Yes, please bring ${many ? "them" : "it"} in`,
+    "Accessories let us send refurbished computers out as complete setups.") + answers() + dropoff(many);
+  return verdict("v-soft", "Accepted", `Yes, we can take ${many ? "these" : "this"}`,
+    "Our biggest need is computers and accessories, but we'll reuse or properly recycle this.") + answers() + dropoff(many);
+}
+
+function doneHTML() {
+  const f = state.form, free = qualifiesFree(), biz = state.who === "biz";
+  const who = biz ? (f.org || f.name) : f.name;
+  const day = f.day === "Either day" || !f.day ? "a Wednesday or Thursday" : `a ${f.day}`;
+  const freeDrop = `Changed your mind? Drop-off is always free on ${HOURS}.`;
+  return verdict(free ? "v-accent" : "v-soft", free ? "Request sent, free pickup" : "Request sent", `Thanks, ${esc(who)}`,
+      free ? `Your ${state.qty} ${things()} qualify for free pickup, so the usual $${f.zone} fee is waived.`
+           : biz ? `We'll email you to confirm the pickup and its fee, from $${f.zone}. ${freeDrop}`
+           : `We'll look at your request and reply by email. Pickup starts at $${f.zone}. ${freeDrop}`) +
+    `<div class="next">
+       <h3>What happens next</h3>
+       <ol>
+         <li><b>We email you</b><span>At ${esc(f.email)}, to set a time on ${day}.</span></li>
+         <li><b>We collect your ${things()}</b><span>From ${esc(f.addr)}.</span></li>
+         <li><b>Every drive is securely wiped</b><span>${biz ? "You get a certificate listing each serial number." : "Your personal data is permanently erased."}</span></li>
+         <li><b>They go to people who need them</b><span>${biz ? "You get a report showing where they went." : "Refurbished and sold at low cost in Toronto."}</span></li>
+       </ol>
+     </div>
+     <div class="actions noprint">
+       ${biz ? `<button class="btn" id="see-cert">See a sample certificate</button>` : ""}
+       <button class="btn quiet" id="restart">Start again</button>
+     </div>
+     <div id="cert"></div>`;
+}
+
+function certHTML() {
+  const f = state.form, d = state.device, usable = state.age !== "old" && state.works !== "no";
+  const kgEach = d.id === "laptop" ? 2.2 : 8;   // rough prototype estimates
+  const reused = Math.round(state.qty * (usable ? (state.age === "new" ? 0.9 : 0.75) : 0.2));
+  const today = new Date().toLocaleDateString("en-CA", { year: "numeric", month: "long", day: "numeric" });
+  const model = f.model || d.name;
+  const rows = Array.from({ length: Math.min(state.qty, 5) }, (_, i) =>
+    `<tr><td>${i + 1}</td><td>${esc(model)}</td><td>SN-${serial(i)}</td><td>Overwrite and verify</td><td>Passed</td></tr>`).join("");
+  return `<div class="cert">
+    <div class="cert-top"><span class="small">Free Geek Toronto partner program</span><span class="sample">Sample</span></div>
+    <h3>Certificate of data sanitization and impact</h3>
+    <p class="small" style="margin:0">Issued to ${esc(f.org || f.name)}, ${today}</p>
+    <div class="figures">
+      <div><b>${state.qty}</b>devices wiped</div>
+      <div><b>${reused}</b>back in use</div>
+      <div><b>${Math.round(state.qty * kgEach)} kg</b>kept from landfill</div>
+    </div>
+    <p style="margin:0 0 16px">Your donation puts affordable computers in the hands of students, newcomers, seniors and low-income families in Toronto.</p>
+    <div class="tablewrap"><table><thead><tr><th scope="col">Device</th><th scope="col">Model</th><th scope="col">Serial</th><th scope="col">Method</th><th scope="col">Result</th></tr></thead><tbody>${rows}</tbody></table></div>
+    ${state.qty > 5 ? `<p class="small">And ${state.qty - 5} more devices in the full report.</p>` : ""}
+    <p class="small" style="margin:16px 0 0">Proposed process: drives wiped following the NIST SP 800-88 guideline with FGT's existing tools. Figures are estimates for this prototype.</p>
+    <div class="actions noprint"><button class="btn quiet" onclick="window.print()">Print or save as PDF</button></div>
+  </div>`;
+}
+
+function serial(i) {
+  const c = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let s = "", n = Math.imul(i + 7, 2654435761) >>> 0;
+  for (let k = 0; k < 8; k++) { n = (Math.imul(n ^ (n >>> 15), 2246822519) + 12345) >>> 0; s += c[(n >>> 8) % c.length]; }
+  return s;
+}
+
+go("device");
+</script>
+</body>
+</html>
