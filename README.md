@@ -62,7 +62,7 @@ js/site.js        menu, scroll animations, counters, quick search
 assets/           logo and photos
 ```
 
-Built with plain HTML, CSS and JavaScript, with no frameworks or build step. It works on phones and computers, supports light and dark mode, and respects the reduced-motion setting.
+Built with plain HTML, CSS and JavaScript, with no frameworks or build step. The look is a dark "midnight" style with one signal-green accent, set in Bricolage Grotesque and Instrument Serif. It works on phones and computers and respects the reduced-motion setting.
 
 ## Run it locally
 

@@ -34,6 +34,25 @@ const seen = new IntersectionObserver((entries) => {
 }, { rootMargin: "0px 0px -12% 0px" });
 document.querySelectorAll("[data-reveal], .zoom").forEach(el => seen.observe(el));
 
+// ---------- stamped titles decode into place, like a label being printed ----------
+const GLYPHS = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789#%&$@";
+const scramble = (el) => {
+  const text = el.textContent, start = performance.now(), dur = 900;
+  el.setAttribute("aria-label", text);
+  const step = (t) => {
+    const p = Math.min(1, (t - start) / dur), fixed = Math.floor(p * text.length);
+    el.textContent = text.split("").map((c, i) => i < fixed || c === " " ? c : GLYPHS[(Math.random() * GLYPHS.length) | 0]).join("");
+    if (p < 1) requestAnimationFrame(step); else { el.textContent = text; el.removeAttribute("aria-label"); }
+  };
+  requestAnimationFrame(step);
+};
+if (!calm) {
+  const stamps = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { stamps.unobserve(e.target); scramble(e.target); } });
+  }, { threshold: .8 });
+  document.querySelectorAll("main h2:not(.sr):not(.panel h2), .ways h3").forEach(h => { if (!h.children.length) stamps.observe(h); });
+}
+
 // ---------- counters ----------
 const counted = new IntersectionObserver((entries) => {
   entries.forEach(e => {
