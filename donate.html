@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Donate Tech | Free Geek Toronto</title>
+<meta name="description" content="Check in 30 seconds whether Free Geek Toronto can take your device, and whether to drop it off or book a pickup.">
+<link rel="icon" href="assets/fgt-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/checker.css">
+<script>document.documentElement.classList.add("js")</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<p class="notice">Student prototype for FUSE Blueprint 2026. This is not an official Free Geek Toronto website.</p>
+<header class="site-head">
+  <div class="frame bar">
+    <a class="brand" href="index.html"><img src="assets/fgt-logo.png" alt="" width="46" height="46"><span>Free Geek Toronto</span></a>
+    <button class="menu-btn" aria-expanded="false" aria-controls="nav">Menu</button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="business.html">Businesses</a>
+      <a href="shop.html">Shop</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a class="btn" href="donate.html" aria-current="page">Donate tech</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<div class="frame layout">
+  <div class="intro">
+    <h1>Can we take your tech?</h1>
+    <p class="lede">Answer a few questions and find out if we can reuse it, and whether to drop it off or book a pickup.</p>
+  </div>
+
+  <aside class="info" aria-labelledby="dropoff-h">
+    <h2 id="dropoff-h">Drop-off</h2>
+    <ul class="facts">
+      <li><b>180 Sudbury St, Unit C3</b><span>Parkdale, Toronto. Entrance on the northeast corner, up a few stairs.</span></li>
+      <li><b>Fridays and Saturdays, 12:15 to 4:45 PM</b><span>We have carts and people to help unload your car.</span></li>
+      <li><b>Free, and your data is erased</b><span>Every drive is securely wiped before anything is reused.</span></li>
+    </ul>
+    <div class="needed">
+      <b>What we need most</b>
+      <p>Laptops, desktops, flat-screen monitors, keyboards, mice and chargers.</p>
+    </div>
+  </aside>
+
+  <section class="tool" aria-labelledby="tool-title">
+    <h2 id="tool-title" class="sr">Donation checker</h2>
+    <div class="tool-head noprint">
+      <button class="back" id="back" hidden>‹ Back</button>
+      <span class="left" id="left" aria-live="polite"></span>
+    </div>
+    <div class="track noprint" role="progressbar" aria-label="Progress" aria-valuemin="0" aria-valuemax="100"><i id="bar"></i></div>
+    <div id="app" aria-live="polite">
+      <noscript><div class="panel"><h2>Turn on JavaScript to use the checker</h2><p class="help">Or see the full list of what we accept below.</p></div></noscript>
+    </div>
+  </section>
+</div>
+
+<section class="section frame below" aria-labelledby="list-h">
+  <div class="section-head" data-reveal>
+    <h2 id="list-h">Everything we accept.</h2>
+    <p>From Free Geek Toronto's donation page. If something isn't listed, give us a call before you bring it.</p>
+  </div>
+  <div class="lists" data-reveal>
+    <div class="list need">
+      <h3>Most needed</h3>
+      <ul><li>Laptops</li><li>Desktop computers</li><li>Flat-screen monitors</li><li>Keyboards and mice</li><li>Webcams and microphones</li><li>Cables, chargers and power supplies</li><li>RAM, hard drives, graphics and network cards</li></ul>
+    </div>
+    <div class="list">
+      <h3>Also accepted</h3>
+      <ul><li>Servers</li><li>Phones and tablets</li><li>Modems, routers and switches</li><li>Gaming consoles and games</li><li>LCD and plasma TVs</li><li>Scanners and digital cameras</li><li>Stereos, radios, receivers and amplifiers</li><li>Turntables and speakers</li><li>Video projectors</li><li>DVD, Blu-ray and VCR players</li></ul>
+    </div>
+    <div class="list no">
+      <h3>Not accepted</h3>
+      <ul><li>Batteries</li><li>Flashlights</li><li>Electric typewriters</li><li>Power tools</li><li>Microwaves and ovens</li><li>Smoke detectors</li><li>Appliances and air conditioners</li><li>Cash registers</li><li>Motors</li><li>VHS tapes</li><li>Fax machines</li><li>Landline phones and answering machines</li></ul>
+    </div>
+  </div>
+</section>
+
+<section class="section frame below" aria-labelledby="data-h">
+  <div class="split">
+    <figure class="media zoom"><img src="assets/img/ram.jpg" alt="Close-up of memory modules stacked side by side." loading="lazy"></figure>
+    <div data-reveal>
+      <h2 id="data-h">Your data is erased first.</h2>
+      <p class="lede">Before any computer is reused, its drive is wiped with industry-standard data destruction. Drives that can't be wiped are destroyed.</p>
+      <p style="margin-top:20px">You don't need to do anything first, but it's still a good idea to back up your files and sign out of your accounts.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section frame below" aria-labelledby="faq-h">
+  <div class="section-head" data-reveal>
+    <h2 id="faq-h">Donation questions.</h2>
+    <p>Still unsure? Call 416-572-3737 during shop hours.</p>
+  </div>
+  <div class="faq" data-reveal>
+    <details><summary>Do you take broken computers?</summary><div class="answer"><p>Yes. Computers that can't be refurbished give us parts, and the rest is sent for responsible recycling.</p></div></details>
+    <details><summary>Does it cost anything to donate?</summary><div class="answer"><p>Drop-off at the shop is always free. Pickup for large batches starts at $60 depending on the area, and businesses giving 10 or more similar, working computers get it free.</p></div></details>
+    <details><summary>Should I bring the chargers?</summary><div class="answer"><p>Please do. A laptop with its own charger is much quicker to refurbish and send out as a complete setup.</p></div></details>
+    <details><summary>What if my item isn't on the list?</summary><div class="answer"><p>Call us before you bring it. We'll tell you whether we can take it, or where it can go instead.</p></div></details>
+  </div>
+</section>
+</main>
+
+<footer class="site-foot">
+  <div class="frame">
+    <p class="big">Free Geek Toronto</p>
+    <div class="foot-grid">
+      <div><h2>Visit</h2><p>C3-180 Sudbury Street<br>Toronto, ON M6J 0A8<br><a href="tel:+14165723737">416-572-3737</a></p></div>
+      <div><h2>Hours</h2><p>Shop: Tuesday to Saturday, 12 to 6 PM<br>Drop-off: Friday and Saturday, 12:15 to 4:45 PM</p></div>
+      <div><h2>Explore</h2><ul><li><a href="donate.html">Donate tech</a></li><li><a href="business.html">Businesses</a></li><li><a href="shop.html">Shop</a></li><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+      <div><h2>Follow</h2><ul><li><a href="https://www.instagram.com/freegeektoronto/">Instagram</a></li><li><a href="https://www.facebook.com/FreeGeekToronto/">Facebook</a></li><li><a href="https://www.eventbrite.ca/o/free-geek-toronto-15051905925">Eventbrite</a></li><li><a href="https://www.freegeektoronto.org/">Official website</a></li></ul></div>
+    </div>
+    <p class="fine">Student prototype for FUSE Blueprint 2026, not an official Free Geek Toronto website. Facts come from freegeektoronto.org. Free business pickup, data-wipe certificates, impact reports and partner tiers are proposed features.</p>
+    <details>
+      <summary>Photo credits</summary>
+      <ul>
+        <li>"Laptop Repair" by Augustin Wafflart, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, <a href="https://commons.wikimedia.org/wiki/File:Laptop_Repair.jpg">Wikimedia Commons</a></li>
+        <li>"Computer e-waste pallet" by Jemimus, <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a>, <a href="https://commons.wikimedia.org/wiki/File:Computer_e-waste_pallet_-_IMG_2287.jpg">Wikimedia Commons</a></li>
+        <li>"Stack of ram sticks" by Kyreb, CC0, <a href="https://commons.wikimedia.org/wiki/File:Stack_of_ram_sticks.jpg">Wikimedia Commons</a></li>
+        <li>"Hackers working on Linux laptop with computer disks and repair kits, Milano 2022" by Kowalski7cc, CC0, <a href="https://commons.wikimedia.org/wiki/File:Hackers_working_on_Linux_laptop_with_computer_disks_and_repair_kits_-_Milano_2022.jpg">Wikimedia Commons</a></li>
+        <li>"Computer Recycling Scrapyard Ottawa Canada 1996" by Paul Harrison, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>, <a href="https://commons.wikimedia.org/wiki/File:Computer_Recycling_Scrapyard_Ottawa_Canada_1996_3_enh.jpg">Wikimedia Commons</a></li>
+        <li>"Queen Street West in Parkdale, September 19 2026" by Dillan Payne, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>, <a href="https://commons.wikimedia.org/wiki/File:Queen_Street_West_in_Parkdale,_September_19_2026.jpg">Wikimedia Commons</a></li>
+        <li>Logo: Free Geek Toronto, used for this case competition prototype.</li>
+      </ul>
+    </details>
+  </div>
+</footer>
+
+<script src="js/devices.js"></script>
+<script src="js/checker.js"></script>
+<script src="js/site.js"></script>
+</body>
+</html>

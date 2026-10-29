@@ -1,0 +1,123 @@
+/* Donation checker (donate.html). The checker sits on the right, the intro and drop-off facts on the left. */
+.layout { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "intro tool" "info tool"; gap: 0 clamp(32px, 5vw, 80px); padding-top: clamp(32px, 6vw, 80px); align-items: start; }
+.intro { grid-area: intro; min-width: 0; }
+.info { grid-area: info; margin-top: 48px; min-width: 0; }
+.tool { grid-area: tool; min-width: 0; }
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: "intro" "tool" "info"; }
+  .info { margin-top: 56px; }
+  .tool { margin-top: 32px; }
+}
+.panel .btn { min-height: 52px; }
+.panel .actions { margin-top: 28px; }
+
+.info h2 { font-size: 22px; letter-spacing: -0.01em; margin: 0 0 16px; }
+.facts { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; }
+.facts b { display: block; font-weight: 600; }
+.facts span { color: var(--muted); font-size: 15px; }
+.needed { margin-top: 32px; padding: 20px 22px; background: var(--surface); }
+.needed p { margin: 6px 0 0; }
+
+/* The checker */
+.tool-head { display: flex; justify-content: space-between; align-items: center; min-height: 40px; gap: 12px; }
+.back { background: none; border: 0; padding: 8px 0; font-weight: 600; cursor: pointer; }
+.back:hover { text-decoration: underline; }
+.back[hidden] { visibility: hidden; display: inline-block; }
+.left { color: var(--muted); font-size: 15px; }
+.track { height: 4px; background: var(--surface-2); margin: 8px 0 0; }
+.track i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .35s cubic-bezier(.2,.7,.2,1); }
+
+.panel { background: var(--surface); padding: clamp(22px, 4vw, 40px); }
+.panel h2 { font-size: clamp(26px, 3vw, 34px); line-height: 1.1; letter-spacing: -0.02em; margin: 0; outline: none; text-wrap: balance; overflow-wrap: anywhere; }
+.panel .help { color: var(--muted); margin: 10px 0 28px; }
+
+.rise > * { animation: rise .45s cubic-bezier(.2,.7,.2,1) both; }
+.rise > *:nth-child(2) { animation-delay: .06s; } .rise > *:nth-child(3) { animation-delay: .12s; }
+.rise > *:nth-child(4) { animation-delay: .18s; } .rise > *:nth-child(5) { animation-delay: .24s; }
+.rise > *:nth-child(n+6) { animation-delay: .3s; }
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .rise > * { animation: none; } .track i { transition: none; } }
+
+/* Square corners everywhere: one shape system. */
+.choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+@media (max-width: 520px) { .choices { grid-template-columns: repeat(2, 1fr); } }
+.choice, .opt, .preset, .seg button, .step-btn { border: 0; cursor: pointer; background: var(--ground); transition: background .15s, color .15s, transform .1s; }
+.choice:hover, .opt:hover, .preset:hover, .step-btn:hover { background: var(--surface-2); }
+.choice:active, .opt:active, .preset:active, .step-btn:active, .btn:active { transform: scale(.98); }
+.choice { min-height: 84px; padding: 16px; text-align: left; font-size: 19px; font-weight: 600; letter-spacing: -0.01em; display: flex; align-items: flex-end; }
+
+.find { margin-top: 28px; }
+.find label, .field label { display: block; font-weight: 600; font-size: 15px; margin-bottom: 8px; }
+input[type=text], input[type=number], input[type=email], select {
+  width: 100%; min-height: 50px; padding: 12px 14px; border: 1px solid var(--surface-2); border-radius: 0; background: var(--ground); }
+input:focus, select:focus { outline: 3px solid var(--focus); outline-offset: 0; }
+input[aria-invalid=true] { border-color: var(--no); }
+.suggest { list-style: none; margin: 4px 0 0; padding: 0; background: var(--ground); }
+.suggest:empty { display: none; }
+.suggest button { width: 100%; display: flex; justify-content: space-between; gap: 12px; text-align: left; padding: 12px 14px; border: 0; background: none; cursor: pointer; }
+.suggest button:hover, .suggest button[aria-selected=true] { background: var(--surface-2); }
+.suggest em { font-style: normal; font-size: 14px; font-weight: 600; white-space: nowrap; }
+.t-need { color: var(--accent); } .t-ok { color: var(--muted); } .t-no { color: var(--no); }
+
+.options { display: grid; gap: 8px; }
+.opt { width: 100%; text-align: left; padding: 16px 18px; min-height: 64px; }
+.opt b { display: block; font-weight: 600; font-size: 18px; }
+.opt span { color: var(--muted); font-size: 15px; }
+.opt[aria-pressed=true] { background: var(--accent); color: var(--accent-ink); }
+.opt[aria-pressed=true] span { color: inherit; }
+
+.stepper { display: flex; gap: 8px; align-items: stretch; }
+.step-btn { width: 56px; font-size: 26px; }
+.stepper input { width: 120px; text-align: center; font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.presets { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.preset { padding: 8px 16px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.note { margin: 20px 0 0; padding: 14px 16px; background: var(--ground); }
+.note.bulk { background: var(--accent-soft); }
+
+.panel .btn.quiet, .cert .btn.quiet { background: var(--ground); color: var(--ink); }
+.btn.block { width: 100%; }
+
+/* Verdict: a whole field of colour, like the tag FGT puts on a donated machine. */
+.verdict { padding: clamp(22px, 4vw, 36px); margin: calc(-1 * clamp(22px, 4vw, 40px)) calc(-1 * clamp(22px, 4vw, 40px)) 28px; }
+.verdict .kind { font-weight: 600; font-size: 15px; margin: 0 0 10px; }
+.verdict h2 { font-size: clamp(30px, 4vw, 44px); }
+.verdict p.say { margin: 14px 0 0; max-width: 46ch; }
+.v-accent { background: var(--accent); color: var(--accent-ink); }
+.v-soft { background: var(--accent-soft); }
+.v-no { background: var(--no); color: var(--no-ink); }
+.v-warn { background: var(--warn-soft); }
+.answers { margin: 0 0 24px; color: var(--muted); }
+.answers button { background: none; border: 0; padding: 0; margin-left: 6px; font-weight: 600; color: var(--ink); text-decoration: underline; cursor: pointer; }
+
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.seg button { padding: 14px; font-weight: 600; }
+.seg button[aria-pressed=true] { background: var(--ink); color: var(--ground); }
+.field { margin-top: 18px; }
+.field .optional { font-weight: 400; color: var(--muted); }
+.err { color: var(--no); font-size: 15px; margin: 6px 0 0; }
+.err:empty { display: none; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+@media (max-width: 560px) { .pair { grid-template-columns: 1fr; } }
+.offer { margin-top: 24px; padding: 16px 18px; background: var(--ground); }
+.offer.free { background: var(--accent-soft); }
+
+.next h3 { font-size: 20px; margin: 0 0 14px; }
+.next ol { margin: 0; padding-left: 22px; display: grid; gap: 14px; }
+.next li::marker { font-weight: 700; color: var(--accent); }
+.next b { display: block; font-weight: 600; }
+.next span { color: var(--muted); font-size: 15px; }
+
+/* Sample certificate */
+.cert { margin-top: 32px; background: var(--ground); padding: clamp(20px, 4vw, 32px); }
+.cert-top { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.cert .sample { color: var(--no); font-weight: 700; font-size: 15px; }
+.cert h3 { font-size: 24px; letter-spacing: -0.015em; line-height: 1.15; margin: 6px 0 4px; }
+.figures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 24px 0; }
+@media (max-width: 520px) { .figures { grid-template-columns: 1fr; } }
+.figures div { background: var(--accent-soft); padding: 16px; }
+.figures b { display: block; font-size: 34px; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--surface-2); white-space: nowrap; }
+th { font-weight: 600; color: var(--muted); }
+.small { color: var(--muted); font-size: 15px; }@media print { .notice, .skip, .site-head, .intro, .info, .tool-head, .track, .site-foot, .noprint, .below { display: none !important; } body { background: #fff; } }
