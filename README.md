@@ -58,11 +58,12 @@ css/home.css      landing page only
 css/checker.css   donation checker and certificate
 js/devices.js     what Free Geek accepts (edit this list to change the checker)
 js/checker.js     the donation checker
-js/site.js        menu, scroll animations, counters, quick search
-assets/           logo and photos
+js/site.js        menu, scroll animations, counters, quick search, bench log
+js/scenes.js      moving backgrounds drawn on canvas
+assets/           logo
 ```
 
-Built with plain HTML, CSS and JavaScript, with no frameworks or build step. The look is a dark "midnight" style with one signal-green accent, set in Bricolage Grotesque and Instrument Serif. It works on phones and computers and respects the reduced-motion setting.
+Built with plain HTML, CSS and JavaScript, with no frameworks or build step. The look is a dark "midnight" style with one signal-green accent, set in Bricolage Grotesque and Instrument Serif. There are no stock photos: every picture is a moving scene drawn in code (a night sky behind the hero, a drive being wiped, a laptop booting, a map ping on Sudbury Street). Scenes pause when off screen and hold still for people who prefer reduced motion. It works on phones and computers and respects the reduced-motion setting.
 
 ## Run it locally
 
@@ -77,7 +78,7 @@ Then go to http://localhost:8000.
 - Facts, accepted items, hours and pickup fees come from freegeektoronto.org. Free Geek's own pages list slightly different drop-off hours, so confirm them before launch.
 - Free business pickup, certificates, impact reports and partner levels are proposed features. The certificate on the business page uses sample figures.
 - The logo belongs to Free Geek Toronto and is used for this case competition prototype.
-- Photos are from Wikimedia Commons under open licences. Each one is credited in the site footer under "Photo credits".
+- The bench log on the home page is a sample; its machines and prices are illustrative.
 
 ## Author
 

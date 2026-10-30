@@ -13,10 +13,30 @@
 .hero .actions { animation-delay: .55s; }
 @keyframes line-up { from { transform: translateY(105%); } to { transform: none; } }
 
-.hero-media { position: relative; margin: 0; min-height: 540px; overflow: hidden; background: var(--surface); border-radius: var(--r); animation: unveil 1.3s var(--ease) .1s both; }
-.hero-media img { position: absolute; inset: -8% 0 0 0; width: 100%; height: 116%; object-fit: cover; animation: settle 2.4s var(--ease) both; will-change: transform; }
-.hero-media figcaption { position: absolute; left: 14px; bottom: 14px; margin: 0; padding: 8px 14px; border-radius: 999px; background: var(--ground); color: var(--muted); font-size: 13px; }
-@keyframes settle { from { transform: scale(1.18); } to { transform: scale(1); } }
+/* The sky moves behind the whole first screen, edge to edge, and fades into the page. */
+.hero-stage { position: relative; isolation: isolate; padding-bottom: clamp(24px, 4vw, 56px); }
+.hero-sky { position: absolute; inset: 0; z-index: -1; border: 0; border-radius: 0; animation: sky-in 2s var(--ease) both;
+  -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent); mask-image: linear-gradient(to bottom, #000 70%, transparent); }
+.hero-sky canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+@keyframes sky-in { from { opacity: 0; } to { opacity: 1; } }
+.hero { align-items: center; }
+
+/* A frosted bench log beside the headline: one machine at a time, ticking through the shop. */
+.bench { align-self: center; padding: clamp(22px, 2.6vw, 34px); border: 1px solid var(--line-strong); border-radius: var(--r); background: rgba(18, 18, 18, .5);
+  -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); animation: fade-up 1s var(--ease) .5s both; }
+.bench-top { display: flex; justify-content: space-between; margin: 0; font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+.bench-top span:last-child { color: var(--warn); }
+.bench-dev { margin: 22px 0 0; font-family: var(--serif); font-style: italic; font-size: clamp(36px, 3.6vw, 54px); line-height: 1; letter-spacing: -0.02em; }
+.bench-spec { margin: 8px 0 0; color: var(--muted); font-size: 15px; }
+.bench-steps { list-style: none; margin: 26px 0 0; padding: 0; display: grid; gap: 4px; counter-reset: s; }
+.bench-steps li { counter-increment: s; display: flex; align-items: center; gap: 14px; padding: 9px 0; border-top: 1px solid var(--line); color: var(--muted); transition: color .4s; }
+.bench-steps li::before { content: "0" counter(s); font-size: 12px; letter-spacing: .1em; width: 22px; }
+.bench-steps li::after { content: ""; margin-left: auto; width: 9px; height: 9px; border-radius: 50%; border: 1px solid var(--line-strong); transition: background .3s, border-color .3s, box-shadow .3s; }
+.bench-steps li.done { color: var(--ink); }
+.bench-steps li.done::after { background: var(--signal); border-color: var(--signal); box-shadow: 0 0 12px var(--signal); }
+.bench-price { display: flex; justify-content: space-between; align-items: baseline; margin: 18px 0 0; padding-top: 16px; border-top: 1px solid var(--line-strong); color: var(--muted); font-size: 14px; letter-spacing: .14em; text-transform: uppercase; }
+.bench-price b { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 40px; letter-spacing: -0.02em; text-transform: none; color: var(--signal); }
+.bench.swap .bench-dev, .bench.swap .bench-spec, .bench.swap .bench-price b { animation: pop .5s var(--ease) both; }
 
 /* The live thing: type anything and see if Free Geek takes it. */
 .check { margin-top: 40px; max-width: 580px; }
@@ -44,7 +64,6 @@
 
 @media (max-width: 900px) {
   .hero { grid-template-columns: 1fr; }
-  .hero-media { min-height: 0; aspect-ratio: 4 / 3; order: 2; }
 }
 
 /* ---------- ticker of accepted items ---------- */
@@ -63,7 +82,7 @@
 .stack { position: relative; height: calc(100% - 28px); overflow: hidden; background: var(--surface); border-radius: var(--r); }
 .stack > * { position: absolute; inset: 0; margin: 0; opacity: 0; transform: scale(1.08); transition: opacity .8s var(--ease), transform 1.4s var(--ease); }
 .stack > .on { opacity: 1; transform: none; }
-.stack img { width: 100%; height: 100%; object-fit: cover; }
+.stack > .scene { border: 0; }
 .figure-card { background: var(--signal); color: var(--signal-ink); display: flex; flex-direction: column; justify-content: flex-end; padding: clamp(28px, 4vw, 56px); }
 .figure-card b { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: clamp(110px, 15vw, 240px); line-height: .8; letter-spacing: -0.04em; }
 .figure-card span { font-size: clamp(20px, 1.8vw, 26px); max-width: 22ch; margin-top: 20px; }
@@ -75,8 +94,7 @@
 .journey-steps > li.on { opacity: 1; }
 .journey-steps h3 { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: clamp(40px, 4.4vw, 68px); letter-spacing: -0.03em; line-height: .98; }
 .journey-steps p { margin-top: 20px; font-size: 19px; max-width: 34ch; color: var(--muted); }
-.journey-steps figure { display: none; margin: 0 0 24px; aspect-ratio: 4 / 3; overflow: hidden; border-radius: var(--r); }
-.journey-steps figure img { width: 100%; height: 100%; object-fit: cover; }
+.journey-steps figure { display: none; margin: 0 0 24px; aspect-ratio: 4 / 3; }
 .journey-steps .figure-card { display: none; }
 
 @media (max-width: 900px) {
@@ -119,5 +137,3 @@
 
 /* ---------- visit ---------- */
 .visit .media { aspect-ratio: 16 / 10; }
-.contrast .media { position: relative; }
-.contrast .media img { position: absolute; inset: 0; }

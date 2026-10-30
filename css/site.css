@@ -62,7 +62,7 @@ p { margin: 0; }
 .link:hover { color: var(--signal); }
 
 /* ---------- header ---------- */
-.site-head { position: sticky; top: 0; z-index: 30; background: var(--ground); border-bottom: 1px solid var(--line); transition: transform .35s var(--ease); }
+.site-head { position: sticky; top: 0; z-index: 30; background: rgba(9, 9, 9, .62); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); transition: transform .35s var(--ease); }
 .site-head.hide { transform: translateY(-100%); }
 .bar { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: var(--head); }
 .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 500; letter-spacing: -0.01em; }
@@ -88,7 +88,6 @@ p { margin: 0; }
 .page-hero { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(32px, 5vw, 80px); align-items: center; padding-top: clamp(40px, 6vw, 96px); }
 .page-hero figure { margin: 0; }
 .page-hero .ph-media { aspect-ratio: 1 / 1; overflow: hidden; background: var(--surface); border-radius: var(--r); }
-.page-hero .ph-media img { width: 100%; height: 100%; object-fit: cover; }
 .page-hero h1 { font-size: clamp(44px, 5.6vw, 84px); }
 @media (max-width: 900px) { .page-hero { grid-template-columns: 1fr; } .page-hero .ph-media { aspect-ratio: 3 / 2; } }
 figcaption { font-size: 14px; color: var(--muted); margin-top: 12px; }
@@ -109,7 +108,6 @@ figcaption { font-size: 14px; color: var(--muted); margin-top: 12px; }
 .split.flip > :first-child { order: 2; }
 .split figure { margin: 0; }
 .split .media { aspect-ratio: 4 / 3; overflow: hidden; background: var(--surface); border-radius: var(--r); }
-.split .media img { width: 100%; height: 100%; object-fit: cover; }
 @media (max-width: 900px) { .split { grid-template-columns: 1fr; } .split.flip > :first-child { order: 0; } }
 
 /* Rows: outlined bands that light up under the pointer. */
@@ -198,6 +196,12 @@ figcaption { font-size: 14px; color: var(--muted); margin-top: 12px; }
 .faq details[open] summary::after { transform: rotate(45deg); }
 .faq .answer { padding: 0 26px 24px; max-width: 70ch; color: var(--muted); }
 
+/* ---------- moving scenes, drawn in code (js/scenes.js) ---------- */
+.scene { position: relative; overflow: hidden; margin: 0; background: var(--ground); border: 1px solid var(--line); border-radius: var(--r); }
+.scene canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.scene-tag { position: absolute; left: 14px; bottom: 14px; z-index: 1; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: rgba(9, 9, 9, .66);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); font-size: 12px; letter-spacing: .16em; text-transform: uppercase; }
+
 /* ---------- footer: the name, and the shop's coordinates stamped like a label ---------- */
 .site-foot { margin-top: var(--gap); border-top: 1px solid var(--line); padding: clamp(56px, 8vw, 112px) 0 40px; }
 .site-foot .big { font-family: var(--serif); font-style: italic; font-size: clamp(56px, 12vw, 190px); letter-spacing: -0.035em; line-height: .86; margin: 0 0 clamp(24px, 3vw, 40px); }
@@ -219,9 +223,6 @@ figcaption { font-size: 14px; color: var(--muted); margin-top: 12px; }
 /* Content is only hidden once the script has started, so nothing stays invisible if it fails. */
 .js [data-reveal] > * { opacity: 0; transform: translateY(28px); transition: opacity .8s var(--ease), transform .8s var(--ease); transition-delay: calc(var(--i, 0) * 80ms); }
 .js [data-reveal].in > * { opacity: 1; transform: none; }
-.media img, .ph-media img { transition: transform 1.2s var(--ease); }
-.js .media.zoom img, .js .ph-media.zoom img { transform: scale(1.12); }
-.js .media.zoom.in img, .js .ph-media.zoom.in img { transform: scale(1); }
 
 /* Inner page heroes animate on load, so the first screen never waits on scrolling. */
 .hero-copy > *, .page-hero figure { animation: fade-up .9s var(--ease) both; }
@@ -234,5 +235,4 @@ figcaption { font-size: 14px; color: var(--muted); margin-top: 12px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
   .js [data-reveal] > * { transform: none; }
-  .js .media.zoom img, .js .ph-media.zoom img { transform: none; }
 }

@@ -68,19 +68,27 @@ const counted = new IntersectionObserver((entries) => {
 }, { threshold: .6 });
 document.querySelectorAll("[data-count]").forEach(el => counted.observe(el));
 
-// ---------- hero picture drifts slower than the page ----------
-const heroImg = document.querySelector(".hero-media img");
-if (heroImg && !calm) {
-  let ticking = false;
-  addEventListener("scroll", () => {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(() => {
-      const y = Math.min(scrollY, 900);
-      heroImg.style.translate = `0 ${y * 0.12}px`;
-      ticking = false;
-    });
-  }, { passive: true });
+// ---------- bench log: one sample machine at a time works through the shop ----------
+const bench = document.querySelector(".bench");
+if (bench) {
+  const MACHINES = [
+    ["ThinkPad T480", "14-inch, 8 GB memory, 256 GB SSD", "$180"],
+    ["Dell OptiPlex 7050", "Desktop, 8 GB memory, 500 GB drive", "$95"],
+    ["MacBook Air 2017", "13-inch, 8 GB memory, 128 GB SSD", "$220"],
+    ["HP EliteBook 840 G5", "14-inch, 16 GB memory, 256 GB SSD", "$240"],
+    ["Dell 24-inch monitor", "1080p, tested, cables included", "$60"],
+  ];
+  const rows = [...bench.querySelectorAll(".bench-steps li")];
+  const [dev, spec, price] = ["bench-dev", "bench-spec", "bench-price"].map(id => document.getElementById(id));
+  let m = 0, k = 0;
+  if (calm) rows.forEach(r => r.classList.add("done"));
+  else setInterval(() => {
+    if (k < rows.length) { rows[k++].classList.add("done"); return; }
+    m = (m + 1) % MACHINES.length; k = 0;
+    [dev.textContent, spec.textContent, price.textContent] = MACHINES[m];
+    rows.forEach(r => r.classList.remove("done"));
+    bench.classList.remove("swap"); void bench.offsetWidth; bench.classList.add("swap");
+  }, 1100);
 }
 
 // ---------- second life: the picture follows the step being read ----------
